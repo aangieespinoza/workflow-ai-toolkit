@@ -1,0 +1,15 @@
+# Never commit local/personal state or secrets
+settings.local.json.real
+*.local.real
+.env
+.env.*
+secrets/
+*.key
+*.pem
+.DS_Store
+
+# Claude runtime state (should never live in this repo)
+history.jsonl
+*.log
+sessions/
+telemetry/

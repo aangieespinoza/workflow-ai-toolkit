@@ -1,0 +1,10 @@
+{
+  "name": "angieespinoza",
+  "version": "0.1.0",
+  "description": "Personal Claude Code workflow skills: feature discovery, plan building, PR review (self + others), Linear tickets, and Prisma migration safety checks.",
+  "author": {
+    "name": "<your-name>",
+    "email": "<your-email>"
+  },
+  "keywords": ["workflow", "skills", "pr-review", "linear", "planning"]
+}

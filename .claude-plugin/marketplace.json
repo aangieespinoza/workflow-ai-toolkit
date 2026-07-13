@@ -1,0 +1,14 @@
+{
+  "name": "workflow-ai-toolkit",
+  "owner": {
+    "name": "<your-name>",
+    "email": "<your-email>"
+  },
+  "plugins": [
+    {
+      "name": "angieespinoza",
+      "source": "./",
+      "description": "Personal Claude Code workflow skills bundled from this repo."
+    }
+  ]
+}
