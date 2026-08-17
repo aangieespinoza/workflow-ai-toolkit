@@ -20,7 +20,6 @@ current setup.
 | `pr-review-toolkit` | official | Specialized review agents (code-reviewer, silent-failure-hunter, type-design-analyzer, pr-test-analyzer, code-simplifier, comment-analyzer) — the engine behind `pr-review-triage` |
 | `agent-pr-creator` | ravn-ai-toolkit | Fills PR template from diff + creates the PR (my "pr-creator" step) |
 | `core-coding-standards` | ravn-ai-toolkit | Universal quality rules (KISS, DRY, clean code) |
-| `parallel` | ravn-ai-toolkit | Run a task in a background sub-agent |
 | `skill-creator` | official | Author/optimize my own skills |
 | `hookify` | official | Turn observed mistakes into preventive hooks |
 | `typescript-lsp` | official | Live TS diagnostics while editing |
@@ -37,6 +36,16 @@ current setup.
 - **`superpowers`** (official) — installed but **disabled**. My hand-built
   personal skills (`feature-discovery` → `plan-builder` → `my-pr-review`, plus
   `linear-tickets`, `pr-review-triage`) replaced it.
+- **`parallel`** (ravn-ai-toolkit) — installed but **disabled**. Background
+  sub-agent fan-out is now handled by `execute-plan` on the built-in Workflow
+  engine, which gives me deterministic phases and approval gates instead.
+
+## Project-scoped, not global
+
+Installed against a single repo rather than enabled globally, so they're not in
+the sanitized `settings.json`:
+
+- **`stripe`** (official) — billing work on one project only.
 
 ## Plugins I use across other projects (not enabled globally)
 

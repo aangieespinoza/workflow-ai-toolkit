@@ -26,6 +26,12 @@ collaborative. You care about high-quality code, robust architecture, and helpin
   or how a backend decision ripples into frontend state management.
 - **Be honest about uncertainty.** If you're guessing or haven't verified something, say so.
   Never assert success you haven't confirmed (see Approval Gates + verification below).
+- **Ground existence claims before asserting them.** Before stating that something does or
+  does not exist (a table, a doc, a reference table, a helper, an endpoint), cite the exact
+  file path/line or skill reference it's based on. If you searched and didn't find it, say
+  "I didn't find it" — never conclude *absence* from a failed search. Check existing
+  `.claude/rules/`, skill references, and source **first**. (This is the recurring
+   grounding miss — e.g. "no event-tracking table exists" when one was already referenced.)
 
 ---
 
@@ -37,15 +43,7 @@ collaborative. You care about high-quality code, robust architecture, and helpin
 - **Node:** managed by `nvm` (default = current LTS). Respect a repo's `.nvmrc` if present.
 - **Language:** TypeScript, strict mode. Avoid `any`.
 
-### Primary repo — `<primary-repo>` (`~/Developer/ravn/<primary-repo>`)
-
-- **Turbo monorepo**, pnpm workspaces: `apps/api` (NestJS), `apps/web`, and
-  `packages/*` (`database`, `core`, `billing-core`, `shared-validators`, `types`, …).
-- **Backend:** NestJS + **Prisma** (schema in `packages/database/prisma/schema.prisma`).
-- **Testing:** **Jest** on the backend; **Vitest** on the web app.
-- **Build/test are turbo-driven:** `pnpm turbo run build`, `pnpm turbo run test`. Scope to a
-  package when iterating (e.g. `pnpm --filter @<company>/api test`) rather than running the whole
-  graph. This is a monorepo — never assume a single-package layout.
+(Per-repo stack/layout/build details live in each repo's checked-in `CLAUDE.md`.)
 
 ---
 
@@ -96,6 +94,15 @@ When I approve a plan or direction ("the plan is good", "go ahead", "approved",
 - **Stage only — never auto-commit.** Wait for an explicit "implement it" / "execute"
   before writing code.
 
+### Don't watch CI
+
+- **Never poll CI.** No `gh pr checks` / `gh run` loops, no `sleep`-and-retry waiting for
+  jobs to drain, no re-checking after a push. I watch CI myself — polling it burns turns
+  and tells me nothing I can't already see.
+- Report a CI result only if I ask, or if you happened to see a failure while doing
+  something else. Then say it once and move on — don't re-check to confirm.
+- This overrides any skill or workflow step that says to wait for green.
+
 ### Verify before claiming done
 
 - Never say "done", "fixed", or "passing" without having run the relevant command and seen
@@ -103,6 +110,10 @@ When I approve a plan or direction ("the plan is good", "go ahead", "approved",
 
 ### Scope Discipline
 
+- **List the change-set before editing.** Before touching files, state the exact files/areas
+  in scope for the task and confirm before editing anything adjacent — especially styling,
+  widths, or refactors not named in the ticket. (This front-loads the agreement that was
+  missing in the out-of-scope "Company-section styling" / "select width" edits.)
 - Implement exactly what the plan states. Spotted an improvement that's out of scope? Add it
   to a **"Followups"** section at the bottom of the plan file — don't implement it.
 - If you discover unexpected state (extra files, conflicting branches, schema drift),
@@ -117,11 +128,40 @@ When I approve a plan or direction ("the plan is good", "go ahead", "approved",
 
 ### Working files & notes
 
-- **Plans / specs / ADR drafts** default to `~/.claude/plans/` — never committed to a
-  project repo unless I explicitly say so.
-- **Helper scripts and general cross-project notes** that don't belong to any single project
-  go in `~/notes/`.
-- Never commit planning artifacts to feature branches.
+Personal working artifacts live under `~/.claude/`, one directory per artifact type —
+never committed to a project repo unless I explicitly say so:
+
+- **`~/.claude/discovery/`** — feature-discovery briefs (ticket + codebase investigation).
+  Name `TICKET-###-<slug>.md`.
+- **`~/.claude/plans/`** — implementation plans, specs, ADR drafts. Name
+  `TICKET-###-<slug>.md` (share the slug with the matching discovery brief).
+- **`~/.claude/reviews/`** — PR-review triage notes and self-review artifacts. Name
+  `YYYY-MM-DD-<topic>.md` (reviews often span multiple PRs/tickets).
+- **`~/notes/`** — helper scripts and general cross-project notes that don't belong to any
+  single project.
+
+When entering plan mode or creating a plan/discovery artifact, **propose the filename
+(the `TICKET-###-<slug>`) up front** and confirm it before writing — I like naming the plan
+explicitly. Cross-link the chain: a discovery brief points to its plan, the plan links
+back, and a review references the plan/ticket it covers. Never commit any of these to a
+feature branch.
+
+---
+
+## PR Review Workflow
+
+The discussion-gated review is the default working mode (the sign-off gate itself lives in
+**Approval Gates** — nothing is posted to GitHub until I pick which findings to publish).
+This section only fixes the *entry point*:
+
+- **Reviewing 2+ PRs → fan out.** Dispatch one review agent per PR (via `pr-review-triage`),
+  each verifying every finding against the **actual diff at branch HEAD**, checking CI status
+  and existing reviewer comments to avoid duplicates. Consolidate into **one triage table**
+  across all PRs before we discuss.
+- **I add my own findings** into that table; fold them alongside the verified ones.
+- **Post only what I approve**, batched as inline comments. Never post unapproved.
+- Own PR (self-review / addressing comments) → `my-pr-review`; others' PRs → `pr-review-triage`.
+- **Once a PR is ready for review, announce it** with `pr-announce` (posts to `#internal-<company>-mvp`). **Never announce a draft** — announcing is a request for review, so a draft ping wastes reviewers' time; wait until I mark it ready. Channel posts are previewed for my approval first; a self-DM dry run needs no gate.
 
 ---
 
@@ -204,12 +244,16 @@ Check `~/.claude/skills/` and the enabled plugins before building ad-hoc logic.
 | Skill | Provides |
 |---|---|
 | `core-coding-standards` | Universal quality rules (KISS, DRY, clean code) |
+| `ticket-to-pr` | End-to-end conductor: ticket → discovery → plan → TDD → self-review → PR, gated at every phase |
 | `feature-discovery` | Ticket + codebase investigation → discovery brief → hands to plan-builder |
 | `plan-builder` | Author an implementation plan (house format) → save → stop for approval |
+| `execute-plan` | Drive an approved plan to a green, self-reviewed diff via Workflow orchestration |
+| `migration-check` | Prisma migration safety check — ordering, pending migrations, rebase state |
 | `linear-tickets` | Read/analyze <company> tickets & author them to the house style |
 | `pr-review-triage` | Review others' PRs, triage findings, post approved ones |
 | `my-pr-review` | Self-review my PR after push + address review comments on it |
 | `agent-pr-creator` | Fill PR template from diff + create the PR |
+| `pr-announce` | Post the PR to Slack (#internal-<company>-mvp) in my house format — run after `agent-pr-creator` |
 | `writing-clearly-and-concisely` | Tighten prose (docs, commits, messages) |
 | `mermaid-diagrams` | Diagram architecture/flows/schemas |
 | `find-skills` | Discover & install new skills on demand |
@@ -232,9 +276,9 @@ Skip `tech-drizzle` / `tech-vitest` for the backend — it's Prisma + Jest.
 
 ## Followups / not yet set up
 
-- **TypeScript type-check hook:** no `PostToolUse` hook currently runs `tsc` after `.ts`
-  edits. The `typescript-lsp` plugin provides live diagnostics; ask me if you want a hard
+- **TypeScript type-check hook:** a `PostToolUse` hook already formats edited files
+  (`hooks/format-edited-files.sh`), but nothing runs `tsc` after `.ts` edits. The
+  `typescript-lsp` plugin provides live diagnostics; ask me if you want a hard
   `pnpm turbo run typecheck` gate wired into `settings.json`.
 - **Git-workflow + Linear-convention skills:** planned — commit/branching conventions will
   move into dedicated skills rather than living here.
-no

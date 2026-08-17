@@ -13,11 +13,18 @@ For every task I pick up, I run this end to end:
 flowchart LR
     T[Ticket / task] --> FD[feature-discovery]
     FD -->|discovery brief| PB[plan-builder]
-    PB -->|approved plan| IMPL[Implement]
+    PB -->|approved plan| IMPL[Implement<br/>hand-written or execute-plan]
     IMPL --> MPR[my-pr-review]
     MPR --> PRC[agent-pr-creator]
     PRC --> PUSH[Push + open PR]
+    PUSH --> ANN[pr-announce]
 ```
+
+**`ticket-to-pr` runs this whole chain for me.** It's the conductor — one entry
+point that drives a ticket through every phase below, stopping at the house
+approval gate between each. It deliberately invents no workflow of its own; it
+chains the same skills I'd run by hand. It's opt-in only (I have to name it), so
+the individual steps below are still how I work when I want tighter control.
 
 **Step by step:**
 
@@ -27,14 +34,27 @@ flowchart LR
    patterns to follow, what to build, which dependencies actually exist).
 2. **`plan-builder`** — I take the discovery brief into planning. `plan-builder`
    writes an implementation plan in my house format and **stops for approval** —
-   it never rolls straight into code. Once the plan is approved and the work is
-   done, I combine it with **`my-pr-review`** to self-review before anyone else
-   looks at it.
-3. **`agent-pr-creator`** (a.k.a. pr-creator) + push — fills the PR template from
-   the diff and commit history, and I push my work.
+   it never rolls straight into code.
+3. **Implement.** Either by hand, or with **`execute-plan`** — which maps the
+   plan's independently-verifiable tasks onto a Workflow fan-out, works TDD-first
+   until validate + tests are green, self-reviews, then hard-stops for
+   commit/PR approval. Naming the skill *is* the opt-in to multi-agent
+   orchestration; nothing fans out unasked.
+4. **`my-pr-review`** — self-review the pushed diff before anyone else looks at
+   it, and later triage/fix/reply to the comments I get.
+5. **`agent-pr-creator`** + push — fills the PR template from the diff and commit
+   history, and I push my work.
+6. **`pr-announce`** — once the PR is **ready** (never while it's a draft), posts
+   it to the team Slack channel in my house format, previewing the text first.
 
-> **Approval gates:** `plan-builder` and `my-pr-review` both stop for my explicit
-> approval. Nothing gets committed, pushed, or opened as a PR without me saying so.
+> **Approval gates:** `plan-builder`, `execute-plan`, and `my-pr-review` all stop
+> for my explicit approval, and `ticket-to-pr` re-enforces a gate between every
+> phase. Nothing gets committed, pushed, opened as a PR, or posted to Slack
+> without me saying so.
+
+> **No CI polling.** None of these wait for checks to go green — I watch CI
+> myself. This is a global rule in `CLAUDE.md` that overrides any skill step
+> saying otherwise.
 
 ---
 
@@ -52,7 +72,10 @@ flowchart LR
 
 1. **`pr-review-triage`** — lets me review multiple PRs at once. It runs the
    **pr-review-toolkit** agents against each PR's diff *and* I do my own
-   code-review pass.
+   code-review pass. For **2+ PRs it fans out** — one review agent per PR, each
+   verifying its findings against the actual diff at branch HEAD and checking
+   existing reviewer comments to avoid duplicates — then consolidates everything
+   into **one triage table**.
 2. I **combine** the agents' findings with mine, then **decide which to post** and
    which to drop. Nothing goes to GitHub until I approve the exact list.
 
@@ -83,8 +106,12 @@ flowchart LR
 
 ```mermaid
 flowchart TD
+    T2PR[ticket-to-pr<br/>conductor] -.-> FD
+    T2PR -.-> PB
+    T2PR -.-> MPR
+    T2PR -.-> PRC
     subgraph Build
-        FD[feature-discovery] --> PB[plan-builder] --> MPR[my-pr-review] --> PRC[agent-pr-creator]
+        FD[feature-discovery] --> PB[plan-builder] --> EP[execute-plan] --> MPR[my-pr-review] --> PRC[agent-pr-creator] --> ANN[pr-announce]
     end
     subgraph Review
         PRT[pr-review-triage] --> PRTK[pr-review-toolkit]
@@ -94,6 +121,9 @@ flowchart TD
     end
     LinearMCP[(Linear MCP)] --> LT
     LinearMCP --> FD
+    ANN --> SlackMCP[(Slack MCP)]
 ```
 
 `feature-discovery` is the hub: it feeds planning *and* ticket authoring.
+`ticket-to-pr` is the conductor over the build lane; `execute-plan` is the
+optional orchestrated implementation step inside it.

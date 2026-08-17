@@ -31,9 +31,36 @@
       "Bash(git push *)",
       "Bash(git commit *)",
       "Bash(git merge *)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
   "model": "opus[1m]",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/format-edited-files.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/guard-integration-tests.sh\"",
+            "timeout": 40,
+            "statusMessage": "Checking apps/api integration-test scope..."
+          }
+        ]
+      }
+    ]
+  },
   "worktree": {
     "bgIsolation": "none"
   },
@@ -51,7 +78,7 @@
     "superpowers@claude-plugins-official": true,
     "core-coding-standards@ravn-ai-toolkit": true,
     "agent-pr-creator@ravn-ai-toolkit": true,
-    "parallel@ravn-ai-toolkit": true,
+    "parallel@ravn-ai-toolkit": false,
     "mermaid-diagrams@agent-toolkit": true,
     "writing-clearly-and-concisely@agent-toolkit": true,
     "claude-hud@claude-hud": true,
@@ -89,6 +116,7 @@
     "enabled": true,
     "mode": "hold"
   },
+  "skipWorkflowUsageWarning": true,
   "theme": "dark-daltonized",
   "preferredNotifChannel": "auto",
   "teammateMode": "in-process"

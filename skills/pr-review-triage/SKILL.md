@@ -1,5 +1,7 @@
 ---
 name: pr-review-triage
+effort: high
+disallowed-tools: Edit, Write
 description: >-
   Review other people's GitHub pull requests, surface findings for discussion,
   and post ONLY the findings the user approves as inline PR comments. Use this

@@ -1,5 +1,6 @@
 ---
 name: linear-tickets
+disallowed-tools: Edit, Write
 description: >-
   Read, analyze, and author <company> Linear tickets in the team's house style.
   Use this whenever the user wants to review what's assigned to them in the

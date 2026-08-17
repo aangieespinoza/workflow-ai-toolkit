@@ -1,5 +1,6 @@
 ---
 name: migration-check
+disallowed-tools: Edit, Write
 description: >
   Prisma migration safety check. Use before generating any new Prisma migration,
   when touching schema.prisma, or when implementing a story that requires a schema

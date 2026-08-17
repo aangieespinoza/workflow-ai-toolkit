@@ -1,5 +1,6 @@
 ---
 name: plan-builder
+effort: high
 description: >-
   Build an implementation plan for a task, ticket, or feature in the user's
   house plan format, then stop for approval — never roll straight into coding.

@@ -1,5 +1,6 @@
 ---
 name: my-pr-review
+effort: high
 description: >-
   Author-side workflow for the user's OWN pull requests: (A) self-review a PR
   after pushing it — catch issues before reviewers do — and (B) address review
