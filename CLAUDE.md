@@ -244,11 +244,11 @@ Check `~/.claude/skills/` and the enabled plugins before building ad-hoc logic.
 | Skill | Provides |
 |---|---|
 | `core-coding-standards` | Universal quality rules (KISS, DRY, clean code) |
-| `ticket-to-pr` | End-to-end conductor: ticket → discovery → plan → TDD → self-review → PR, gated at every phase |
+| `ticket-to-pr` | End-to-end conductor: TICKET-### → discovery → plan → TDD → self-review → PR, gated at every phase. Ask for it by name |
 | `feature-discovery` | Ticket + codebase investigation → discovery brief → hands to plan-builder |
 | `plan-builder` | Author an implementation plan (house format) → save → stop for approval |
-| `execute-plan` | Drive an approved plan to a green, self-reviewed diff via Workflow orchestration |
-| `migration-check` | Prisma migration safety check — ordering, pending migrations, rebase state |
+| `execute-plan` | Drive an already-approved plan to a green, self-reviewed diff via Workflow orchestration. Ask for it by name |
+| `migration-check` | Prisma migration safety check (ordering, pending migrations, rebase state) — run before generating a migration |
 | `linear-tickets` | Read/analyze <company> tickets & author them to the house style |
 | `pr-review-triage` | Review others' PRs, triage findings, post approved ones |
 | `my-pr-review` | Self-review my PR after push + address review comments on it |
